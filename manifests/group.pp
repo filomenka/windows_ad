@@ -43,11 +43,11 @@
 define windows_ad::group(
   $ensure           = present,         # add or delete user
   $path             = $path,           # where is located the account
-  $displayname      = $displayname,    # the displayname
+  $displayname      = $groupname,    # the displayname
   $groupname        = $groupname,      # is name powersherll parameter
   $groupscope       = 'Global',        # is groupscope (DomainLocal  OR  Global  OR  Universal )
   $groupcategory    = 'Security',      # is groupcategory ( Security  OR Distribution  )
-  $description      = '',              # description of group
+  $description      = $groupname,              # description of group
   $confirmdeletion  = false,           # delete without confirmation
 ){
 
