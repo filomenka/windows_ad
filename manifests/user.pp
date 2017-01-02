@@ -52,27 +52,29 @@
 # Copyright 2014 Jerome RIVIERE.
 #
 define windows_ad::user(
-  $ensure               = present,                            # add or delete user
-  $domainname           = $domainname,                        # the domain name like : jre.local
-  $path                 = $path,                              # where is located the account
-  $accountname          = $accountname,                       # is samaccountname
-  $lastname             = '',                                 # is lastname
-  $firstname            = '',                                 # is firstname
-  $fullname             = '',                                 # is fullname
-  $emailaddress         = '',                                 # email address
-  $description          = '',                                 # is description
-  $passwordneverexpires = true,                               # password never expire or expire(true/false)
-  $passwordlength       = 9,                                  # password length
-  $enabled              = true,                               # enable account after creation (true/false)
-  $password             = '',                                 # password to set to the account. Default autogenerating
-  $writetoxmlflag       = true,                               # Flag that makes writing to the users.xml optional
-  $xmlpath              = 'C:\\users.xml',                    # file where to save user info. Default set to C:\\users.xml
+  $ensure                = present,                            # add or delete user
+  $domainname            = $domainname,                        # the domain name like : jre.local
+  $path                  = $path,                              # where is located the account
+  $accountname           = $accountname,                       # is samaccountname
+  $lastname              = '',                                 # is lastname
+  $firstname             = '',                                 # is firstname
+  $fullname              = '',                                 # is fullname
+  $emailaddress          = '',                                 # email address
+  $description           = '',                                 # is description
+  $passwordneverexpires  = true,                               # password never expire or expire (true/false)
+  $changepasswordatlogon = false,                             # password change at logon (true/false)
+  $passwordlength        = 9,                                  # password length
+  $enabled               = true,                               # enable account after creation (true/false)
+  $password              = '',                                 # password to set to the account. Default autogenerating
+  $writetoxmlflag        = false,                              # Flag that makes writing to the users.xml optional
+  $xmlpath               = 'C:\\users.xml',                    # file where to save user info. Default set to C:\\users.xml
 
 # delete user
   $confirmdeletion      = false,                              # delete wihtout confirmation
 ){
   validate_re($ensure, '^(present|absent)$', 'valid values for ensure are \'present\' or \'absent\'')
   validate_bool($passwordneverexpires)
+  validate_bool($changepasswordatlogon)
   validate_bool($enabled)
   validate_bool($writetoxmlflag)
 
@@ -139,7 +141,7 @@ define windows_ad::user(
       provider    => powershell,
     }
     exec { "Add User - ${accountname}":
-      command     => "import-module servermanager;add-windowsfeature -name 'rsat-ad-powershell' -includeAllSubFeature;import-module activedirectory;New-ADUser -name '${fullnamevalue}' -DisplayName '${fullnamevalue}' ${givenparam} ${lastnameparam} ${emailaddressparam} -Samaccountname '${accountname}' -UserPrincipalName '${userprincipalname}' -Description '${description}' -PasswordNeverExpires $${passwordneverexpires} -path '${path}' -AccountPassword (ConvertTo-SecureString '${pwd}' -AsPlainText -force) -Enabled $${enabled};",
+      command     => "import-module servermanager;add-windowsfeature -name 'rsat-ad-powershell' -includeAllSubFeature;New-ADUser -name '${fullnamevalue}' -DisplayName '${fullnamevalue}' ${givenparam} ${lastnameparam} ${emailaddressparam} -Samaccountname '${accountname}' -UserPrincipalName '${userprincipalname}' -Description '${description}' -PasswordNeverExpires $${passwordneverexpires} -path '${path}' -AccountPassword (ConvertTo-SecureString '${pwd}' -AsPlainText -force) -Enabled $${enabled} -ChangePasswordAtLogon $${changepasswordatlogon};",
       onlyif      => "\$oustring = \"CN=${fullnamevalue},${path}\"; if([adsi]::Exists(\"LDAP://\$oustring\")){exit 1}",
       provider    => powershell,
     }

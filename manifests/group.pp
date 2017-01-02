@@ -47,7 +47,7 @@ define windows_ad::group(
   $groupname        = $groupname,      # is name powersherll parameter
   $groupscope       = 'Global',        # is groupscope (DomainLocal  OR  Global  OR  Universal )
   $groupcategory    = 'Security',      # is groupcategory ( Security  OR Distribution  )
-  $description      = $groupname,              # description of group
+  $description      = $groupname,      # description of group
   $confirmdeletion  = false,           # delete without confirmation
 ){
 
