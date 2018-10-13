@@ -58,22 +58,24 @@ define windows_ad::organisationalunit(
   validate_re($ensure, '^(present|absent)$', 'valid values for ensure are \'present\' or \'absent\'')
 
   if($ensure == 'present'){
-    exec { "Adding OU - ${ouName}":
+    exec { "Adding OU=${ouName},${path}":
+      #command     => "Echo \"import-module activedirectory;New-ADOrganizationalUnit -Name '${ouName}' -Path '${path}' -ProtectedFromAccidentalDeletion $${protectfordeletion}\"",
       command     => "import-module activedirectory;New-ADOrganizationalUnit -Name '${ouName}' -Path '${path}' -ProtectedFromAccidentalDeletion $${protectfordeletion}",
       onlyif      => "if([adsi]::Exists(\"LDAP://OU=${ouName},${path}\")){exit 1}",
       provider    => powershell,
+      #logoutput   => true,
     }
   }elsif($ensure == 'absent'){
-    exec { "Unprotecting OU - ${ouName}":
+    exec { "Unprotecting OU=${ouName},${path}":
       command     => "Set-ADOrganizationalUnit -ProtectedFromAccidentalDeletion \$false -Identity \"OU=${ouName},${path}\";",
       onlyif      => "if([adsi]::Exists(\"LDAP://OU=${ouName},${path}\")){}else{exit 1}",
       provider    => powershell,
     }
-    exec { "Deleting OU - ${ouName}":
+    exec { "Deleting OU=${ouName},${path}":
       command     => "Remove-ADOrganizationalUnit -Identity \"OU=${ouName},${path}\" -Confirm:$${confirmdeletion} -Recursive;",
       onlyif      => "if([adsi]::Exists(\"LDAP://OU=${ouName},${path}\")){}else{exit 1}",
       provider    => powershell,
     }
-    Exec["Unprotecting OU - ${ouName}"] -> Exec["Deleting OU - ${ouName}"]
+    Exec["Unprotecting OU=${ouName},${path}"] -> Exec["Deleting OU=${ouName},${path}"]
   }
 }
