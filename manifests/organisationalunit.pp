@@ -63,7 +63,7 @@ define windows_ad::organisationalunit(
       command     => "import-module activedirectory;New-ADOrganizationalUnit -Name '${ouName}' -Path '${path}' -ProtectedFromAccidentalDeletion $${protectfordeletion}",
       onlyif      => "if([adsi]::Exists(\"LDAP://OU=${ouName},${path}\")){exit 1}",
       provider    => powershell,
-      #logoutput   => true,
+      logoutput   => true,
     }
   }elsif($ensure == 'absent'){
     exec { "Unprotecting OU=${ouName},${path}":
